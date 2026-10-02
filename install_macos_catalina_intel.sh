@@ -75,12 +75,13 @@ TMP_REQ="$WORK_ROOT/requirements-catalina.txt"
 # para CPython 3.10 + macOS Intel 10.9+, evitando compilar LLVM en Catalina.
 grep -v '^onnxruntime-gpu' requirements.txt \
   | sed 's/^llvmlite$/llvmlite==0.39.1/' \
+  | sed 's/^onnx$/onnx==1.15.0/' \
   > "$TMP_REQ"
 printf '\nnumba==0.56.4\n' >> "$TMP_REQ"
 
 echo
 echo "Instalando dependencias de UVR para CPU..."
-python -m pip install --no-cache-dir --only-binary=llvmlite -r "$TMP_REQ"
+python -m pip install --no-cache-dir --only-binary=llvmlite,onnx -r "$TMP_REQ"
 
 echo
 if command -v ffmpeg >/dev/null 2>&1; then
