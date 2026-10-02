@@ -62,6 +62,12 @@ fi
 source "$VENV_DIR/bin/activate"
 python -m pip install --upgrade "pip<24.1" setuptools wheel
 
+# Algunas dependencias antiguas de UVR todavía declaran el paquete PyPI
+# obsoleto "sklearn". Instalamos la implementación real y permitimos ese
+# alias solo durante esta instalación para mantener compatibilidad.
+export SKLEARN_ALLOW_DEPRECATED_SKLEARN_PACKAGE_INSTALL=True
+python -m pip install --no-cache-dir "scikit-learn==1.2.2"
+
 TMP_REQ="$WORK_ROOT/requirements-catalina.txt"
 
 # onnxruntime-gpu no corresponde en un Mac Intel sin CUDA.
