@@ -60,7 +60,10 @@ if [ ! -d "$VENV_DIR" ]; then
 fi
 
 source "$VENV_DIR/bin/activate"
-python -m pip install --upgrade "pip<24.1" setuptools wheel
+# UVR/librosa 0.9.2 todavía importa pkg_resources.
+# setuptools 82+ lo eliminó, así que fijamos una versión que aún lo incluye.
+python -m pip install --upgrade "pip<24.1" "setuptools==80.9.0" wheel
+python -c "import pkg_resources; print('pkg_resources OK')"
 
 # Algunas dependencias antiguas de UVR todavía declaran el paquete PyPI
 # obsoleto "sklearn". Instalamos la implementación real y permitimos ese
