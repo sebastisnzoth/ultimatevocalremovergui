@@ -45,6 +45,15 @@ fi
 
 echo "Python: $($PYTHON --version)"
 
+# Mantener temporales y caché junto al proyecto. En Macs con poco espacio
+# interno, /var/folders puede llenarse aunque UVR esté en un disco externo.
+WORK_ROOT="$APP_DIR/.install-work"
+export TMPDIR="$WORK_ROOT/tmp"
+export PIP_CACHE_DIR="$WORK_ROOT/pip-cache"
+mkdir -p "$TMPDIR" "$PIP_CACHE_DIR"
+echo "Temporales: $TMPDIR"
+echo "Cache pip:  $PIP_CACHE_DIR"
+
 VENV_DIR=".venv-catalina"
 if [ ! -d "$VENV_DIR" ]; then
   "$PYTHON" -m venv "$VENV_DIR"
@@ -53,8 +62,7 @@ fi
 source "$VENV_DIR/bin/activate"
 python -m pip install --upgrade "pip<24.1" setuptools wheel
 
-TMP_REQ="$(mktemp)"
-trap 'rm -f "$TMP_REQ"' EXIT
+TMP_REQ="$WORK_ROOT/requirements-catalina.txt"
 
 # onnxruntime-gpu no corresponde en un Mac Intel sin CUDA.
 # Usamos onnxruntime CPU para evitar una dependencia que no puede funcionar aquí.
@@ -62,7 +70,7 @@ grep -v '^onnxruntime-gpu' requirements.txt > "$TMP_REQ"
 
 echo
 echo "Instalando dependencias de UVR para CPU..."
-python -m pip install -r "$TMP_REQ"
+python -m pip install --no-cache-dir -r "$TMP_REQ"
 
 echo
 if command -v ffmpeg >/dev/null 2>&1; then
