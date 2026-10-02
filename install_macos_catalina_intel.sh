@@ -71,12 +71,16 @@ python -m pip install --no-cache-dir "scikit-learn==1.2.2"
 TMP_REQ="$WORK_ROOT/requirements-catalina.txt"
 
 # onnxruntime-gpu no corresponde en un Mac Intel sin CUDA.
-# Usamos onnxruntime CPU para evitar una dependencia que no puede funcionar aquí.
-grep -v '^onnxruntime-gpu' requirements.txt > "$TMP_REQ"
+# Además fijamos Numba/llvmlite a una pareja que tiene wheels precompilados
+# para CPython 3.10 + macOS Intel 10.9+, evitando compilar LLVM en Catalina.
+grep -v '^onnxruntime-gpu' requirements.txt \
+  | sed 's/^llvmlite$/llvmlite==0.39.1/' \
+  > "$TMP_REQ"
+printf '\nnumba==0.56.4\n' >> "$TMP_REQ"
 
 echo
 echo "Instalando dependencias de UVR para CPU..."
-python -m pip install --no-cache-dir -r "$TMP_REQ"
+python -m pip install --no-cache-dir --only-binary=llvmlite -r "$TMP_REQ"
 
 echo
 if command -v ffmpeg >/dev/null 2>&1; then
